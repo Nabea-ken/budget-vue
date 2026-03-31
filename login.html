@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+    />
+    <title>Login</title>
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">BUDGET APP</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNavAltMarkup"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+          <div class="navbar-nav">
+            <a class="nav-link active" href="login.html">Login</a>
+            <a class="nav-link" href="register.html">Register</a>
+            <a class="nav-link" href="index.html">Budget</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container mt-4" id="app">
+      <h2>Login</h2>
+
+      <form @submit.prevent="loginUser">
+        <div class="mb-3">
+          <label for="email">Email</label>
+          <input
+            class="form-control"
+            type="email"
+            id="email"
+            v-model="email"
+            placeholder="Enter your email"
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="password">Password</label>
+          <input
+            class="form-control"
+            type="password"
+            id="password"
+            v-model="password"
+            placeholder="Enter your password"
+          />
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          <span v-if="!loader">Login</span>
+          <i v-if="loader" class="fa-solid fa-spinner fa-spin"></i>
+        </button>
+      </form>
+
+      <div class="alert alert-success mt-3" v-if="alertSuccessShow" role="alert">
+        {{ alertMessage }}
+      </div>
+
+      <div class="alert alert-danger mt-3" v-if="alertErrorShow" role="alert">
+        {{ alertMessage }}
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.16/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+      new Vue({
+        el: "#app",
+        data: {
+          email: "",
+          password: "",
+          alertMessage: "",
+          alertSuccessShow: false,
+          alertErrorShow: false,
+          loader: false,
+          url: "http://127.0.0.1:5000"
+        },
+
+        methods: {
+          showSuccess(message) {
+            this.alertMessage = message;
+            this.alertSuccessShow = true;
+            this.alertErrorShow = false;
+          },
+
+          showError(message) {
+            this.alertMessage = message;
+            this.alertErrorShow = true;
+            this.alertSuccessShow = false;
+          },
+
+          loginUser() {
+            if (!this.email || !this.password) {
+              this.showError("Please fill in all fields.");
+              return;
+            }
+
+            this.loader = true;
+
+            axios.post(this.url + "/login", {
+              email: this.email,
+              password: this.password
+            })
+            .then((response) => {
+              this.loader = false;
+
+              const token = response.data.token;
+              localStorage.setItem("token", token);
+
+              this.showSuccess(response.data.message || "Login successful");
+
+              setTimeout(() => {
+                window.location.href = "index.html";
+              }, 1000);
+            })
+            .catch((error) => {
+              this.loader = false;
+
+              this.showError(
+                error.response?.data?.message ||
+                error.response?.data?.error ||
+                "Login failed."
+              );
+            });
+          }
+        },
+
+        mounted() {
+          if (localStorage.getItem("token")) {
+            window.location.href = "index.html";
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
