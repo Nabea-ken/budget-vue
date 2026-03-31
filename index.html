@@ -5,40 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+      rel="stylesheet" />
     <link
       href="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.3.7/datatables.min.css"
-      rel="stylesheet"
-    />
+      rel="stylesheet" />
     <title>Budget</title>
   </head>
 
   <body>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">BUDGET APP</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNavAltMarkup"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
+    <div class="container mt-4" id="app">
+      <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">BUDGET APP</a>
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNavAltMarkup">
+            <span class="navbar-toggler-icon"></span>
+          </button>
 
-        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-          <div class="navbar-nav">
-            <a class="nav-link" href="login.html">Login</a>
-            <a class="nav-link" href="register.html">Register</a>
-            <a class="nav-link active" href="index.html">Budget</a>
-            <a class="nav-link" href="#" @click="logoutUser">Logout</a>
+          <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+              <a class="nav-link" href="login.html">Login</a>
+              <a class="nav-link" href="register.html">Register</a>
+              <a class="nav-link active" href="index.html">Budget</a>
+              <a class="nav-link" href="#" @click="logoutUser">Logout</a>
+            </div>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
 
-    <div class="container mt-4" id="app">
       <h2>Add Budget</h2>
 
       <form @submit.prevent="addBudget">
@@ -47,8 +44,7 @@
             v-model="form.title"
             type="text"
             class="form-control"
-            placeholder="Enter budget title"
-          />
+            placeholder="Enter budget title" />
         </div>
 
         <div class="mb-3">
@@ -56,22 +52,21 @@
             v-model="form.amount"
             type="number"
             class="form-control"
-            placeholder="Enter amount"
-          />
+            placeholder="Enter amount" />
         </div>
 
         <div class="mb-3">
           <input
             v-model="form.date"
             type="date"
-            class="form-control"
-          />
+            class="form-control" />
         </div>
 
         <button type="submit" class="btn btn-primary">Add Budget</button>
       </form>
 
-      <div class="alert alert-success mt-3" v-if="alertSuccessShow" role="alert">
+      <div class="alert alert-success mt-3" v-if="alertSuccessShow"
+        role="alert">
         {{ alertMessage }}
       </div>
 
@@ -102,9 +97,12 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.16/vue.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.3.7/datatables.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.16/vue.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script
+      src="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.3.7/datatables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <script>
@@ -120,7 +118,7 @@
           alertMessage: "",
           alertSuccessShow: false,
           alertErrorShow: false,
-          token: localStorage.getItem("token") || "",
+          token: "",
           url: "http://127.0.0.1:5000"
         },
 
@@ -129,20 +127,12 @@
             this.alertMessage = message;
             this.alertSuccessShow = true;
             this.alertErrorShow = false;
-
-            setTimeout(() => {
-              this.alertSuccessShow = false;
-            }, 2000);
           },
 
           showError(message) {
             this.alertMessage = message;
             this.alertErrorShow = true;
             this.alertSuccessShow = false;
-
-            setTimeout(() => {
-              this.alertErrorShow = false;
-            }, 3000);
           },
 
           addBudget() {
@@ -150,6 +140,9 @@
               this.showError("All fields are required");
               return;
             }
+
+            console.log("this.form is ",this.form)
+            console.log("this.token is  ",this.token)
 
             axios.post(
               this.url + "/budget",
@@ -171,12 +164,13 @@
                 amount: "",
                 date: ""
               };
-              this.fetchBudgets();
+
+            setTimeout(() => {
+              this.alertSuccessShow = false;
+            }, 2000);
             })
             .catch((error) => {
               this.showError(
-                error.response?.data?.message ||
-                error.response?.data?.error ||
                 "Error adding budget"
               );
             });
@@ -189,7 +183,10 @@
               }
             })
             .then((response) => {
-              this.budgets = response.data.budgets || [];
+              this.budgets = response.data.budgets
+
+              console.log("this.budget is ",this.budget)
+              console.log("this.token is ",this.token)
 
               this.$nextTick(() => {
                 if ($.fn.DataTable.isDataTable("#myTable")) {
@@ -215,7 +212,8 @@
         },
 
         mounted() {
-          if (this.token) {
+           if (localStorage.getItem("token") != null) {
+            this.token = localStorage.getItem("token")
             this.fetchBudgets();
           } else {
             window.location.href = "login.html";
